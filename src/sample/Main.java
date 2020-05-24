@@ -26,9 +26,11 @@ import java.util.Vector;
 
 public class Main extends Application {
 
+    private static final boolean BLOWUP_EYE = true;
+    private static final boolean DRAW_KELLY_MASKS = false;
     private static final boolean OUTLINE_FACES = false;
     private static final boolean OUTLINE_EYES = false;
-    private static final boolean OUTLINE_MOUTHS = true;
+    private static final boolean OUTLINE_MOUTHS = false;
 
     private static final Scalar MASK_COLOR = new Scalar(0,0,0,255); // black
 
@@ -58,16 +60,17 @@ public class Main extends Application {
         loader.setLocation(getClass().getResource("sample.fxml"));
         Parent root = loader.load();
 
-        primaryStage.setTitle("Ned Kelly Mask");
-        primaryStage.setScene(new Scene(root, 320, 240));
+        primaryStage.setTitle("Eyeblow");
+        Scene primaryScene = new Scene(root, 640, 480);
+        primaryStage.setScene(primaryScene);
         primaryStage.show();
 
         // get camera image to resize with window resize
         ChangeListener<Number> stageSizeListener = (observable, oldValue, newValue) ->
-            resizeCameraView(primaryStage);
+            resizeCameraView(primaryStage, primaryScene);
         primaryStage.widthProperty().addListener(stageSizeListener);
         primaryStage.heightProperty().addListener(stageSizeListener);
-        resizeCameraView(primaryStage);
+        resizeCameraView(primaryStage, primaryScene);
 
 
         // initialise classifiers
@@ -86,6 +89,10 @@ public class Main extends Application {
         timer.start();
     }
 
+    /**
+     * Executes detection and painting results
+     * @param frame
+     */
     private void processFrame(Mat frame)
     {
         // prepare for face detection
@@ -97,54 +104,110 @@ public class Main extends Application {
         int minFaceSize = Math.round(grayFrame.rows() * 0.1f);
         MatOfRect faces = new MatOfRect();
         faceCascade.detectMultiScale(grayFrame, faces, 1.1, 2,
-                0 | Objdetect.CASCADE_SCALE_IMAGE, new Size(minFaceSize,minFaceSize), new Size());
+                Objdetect.CASCADE_SCALE_IMAGE, new Size(minFaceSize,minFaceSize), new Size());
 
         // do eye detection
         int minEyeSize = Math.round(grayFrame.rows() * 0.05f);
         MatOfRect eyes = new MatOfRect();
         eyeCascade.detectMultiScale(grayFrame, eyes, 1.1, 2,
-                0 | Objdetect.CASCADE_SCALE_IMAGE, new Size(minEyeSize,minEyeSize), new Size());
+                Objdetect.CASCADE_SCALE_IMAGE, new Size(minEyeSize,minEyeSize), new Size());
 
         // do mouth detection
         int minMouthSize = Math.round(grayFrame.rows() * 0.2f);
         MatOfRect mouths = new MatOfRect();
         mouthCascade.detectMultiScale(grayFrame, mouths, 1.1, 2,
-                0 | Objdetect.CASCADE_SCALE_IMAGE, new Size(minMouthSize,minMouthSize), new Size());
+                Objdetect.CASCADE_SCALE_IMAGE, new Size(minMouthSize,minMouthSize), new Size());
 
         // get Rect arrays from detected rectangles
         Rect[] facesArray = faces.toArray();
         Rect[] eyesArray = eyes.toArray();
         Rect[] mouthsArray = mouths.toArray();
 
-        // draw kelly mask
-        drawKellyMasks(frame, facesArray, eyesArray);
+        // draw blown up eye
+        if (BLOWUP_EYE)
+        {
+            Rect er = blowupEyeRect(facesArray, eyesArray);
+            if (er != null)
+            {
+                Mat sourceEyeMat = frame.submat(er);
+                Mat blowupEyeMat = new Mat();
+                Size blowupSize = new Size();
+                blowupSize.width = frame.width();
+                blowupSize.height = frame.height();
+                Imgproc.resize(sourceEyeMat, blowupEyeMat, blowupSize);
+                blowupEyeMat.copyTo(frame);
+            }
+        }
+
+        // draw kelly masks
+        if (DRAW_KELLY_MASKS)
+        {
+            drawKellyMasks(frame, facesArray, eyesArray);
+        }
 
         // draw results of face detection to the original camera frame
         if (OUTLINE_FACES)
         {
-            for (int i = 0; i < facesArray.length; i++)
+            for (Rect rect : facesArray)
             {
-                Imgproc.rectangle(frame, facesArray[i].tl(), facesArray[i].br(), new Scalar(0, 255, 0, 255), 3);
+                Imgproc.rectangle(frame, rect.tl(), rect.br(), new Scalar(0, 255, 0, 255), 3);
             }
         }
 
         // draw results of eye detection to the original camera frame
         if (OUTLINE_EYES)
         {
-            for (int i = 0; i < eyesArray.length; i++)
+            for (Rect rect : eyesArray)
             {
-                Imgproc.rectangle(frame, eyesArray[i].tl(), eyesArray[i].br(), new Scalar(255, 255, 0, 255), 2);
+                Imgproc.rectangle(frame, rect.tl(), rect.br(), new Scalar(255, 255, 0, 255), 2);
             }
         }
 
         // draw results of mouth detection
         if (OUTLINE_MOUTHS)
         {
-            for (int i = 0; i < mouthsArray.length; i++)
+            for (Rect rect : mouthsArray)
             {
-                Imgproc.rectangle(frame, mouthsArray[i].tl(), mouthsArray[i].br(), new Scalar(0,0,255,255), 2);
+                Imgproc.rectangle(frame, rect.tl(), rect.br(), new Scalar(0, 0, 255, 255), 2);
             }
         }
+    }
+
+    /**
+     * Returns the rect of the first detected eye in the first detected face.
+     * If there was no detected face then returns rect of first detected eye.
+     * Returns null if there was no detected eye.
+     * @param faces
+     * @param eyes
+     * @return
+     */
+    private Rect blowupEyeRect(@NotNull Rect[] faces, @NotNull Rect[] eyes)
+    {
+        Rect eyeRect = null;
+
+        for (Rect f : faces)
+        {
+            for (Rect e : eyes)
+            {
+                if (rect1InRect2(e,f))
+                {
+                    eyeRect = e;
+                    break;
+                }
+            }
+            if (eyeRect != null)
+                break;
+        }
+
+        if (eyeRect == null)
+        {
+            if (eyes.length > 0)
+            {
+                eyeRect = eyes[0];
+            }
+        }
+
+        return eyeRect;
     }
 
     private Image convertFrameToImage(Mat frame)
@@ -264,10 +327,15 @@ public class Main extends Application {
         launch(args);
     }
 
-    private void resizeCameraView(Stage stage)
+    /**
+     * Resizes the CameraView to fill the stage (window)
+     * @param stage
+     * @param scene
+     */
+    private void resizeCameraView(Stage stage, Scene scene)
     {
         cameraView.setFitWidth(stage.getWidth());
-        cameraView.setFitHeight(stage.getHeight());
+        cameraView.setFitHeight(stage.getHeight()-20);
     }
 
     private class DrawTimer extends AnimationTimer
