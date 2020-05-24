@@ -20,19 +20,26 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
 import org.opencv.objdetect.Objdetect;
 import org.opencv.videoio.VideoCapture;
+
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.util.List;
 import java.util.Vector;
 
 public class Main extends Application {
 
-    private static final boolean BLOWUP_EYE = true;
+    private static final boolean BLOWUP_EYE = false;
     private static final boolean DRAW_KELLY_MASKS = false;
     private static final boolean OUTLINE_FACES = false;
     private static final boolean OUTLINE_EYES = false;
     private static final boolean OUTLINE_MOUTHS = false;
 
     private static final Scalar MASK_COLOR = new Scalar(0,0,0,255); // black
+
+    private static final int TIMER_INTERVAL = 250;
 
     @FXML
     private ImageView cameraView;
@@ -46,7 +53,7 @@ public class Main extends Application {
     static { System.loadLibrary(Core.NATIVE_LIBRARY_NAME); }
 
     private VideoCapture capture;
-    private DrawTimer timer;
+    private Timer timer;
 
     CascadeClassifier faceCascade;
     CascadeClassifier eyeCascade;
@@ -55,6 +62,8 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception
     {
+        System.out.println(Core.VERSION);
+
         FXMLLoader loader = new FXMLLoader();
         loader.setController(this);
         loader.setLocation(getClass().getResource("sample.fxml"));
@@ -75,18 +84,50 @@ public class Main extends Application {
 
         // initialise classifiers
         faceCascade = new CascadeClassifier();
-        faceCascade.load("resources\\haarcascades\\haarcascade_frontalface_alt.xml");
+        faceCascade.load(makeFilePath("resources", "haarcascades", "haarcascade_frontalface_alt.xml"));
         eyeCascade = new CascadeClassifier();
-        eyeCascade.load("resources\\haarcascades\\haarcascade_eye.xml");
+        eyeCascade.load(makeFilePath("resources", "haarcascades", "haarcascade_eye.xml"));
         mouthCascade = new CascadeClassifier();
-        mouthCascade.load("resources\\haarcascades\\haarcascade_mcs_mouth.xml");
+        mouthCascade.load(makeFilePath("resources", "haarcascades", "haarcascade_mcs_mouth.xml"));
 
         // initialise video capture
-        capture = new VideoCapture(0);
+        capture = new VideoCapture();
+        capture.open(0);
 
         // start draw timer
-        timer = new DrawTimer();
+        // timer = new DrawTimer();
+        // timer.start();
+
+        ActionListener timerAction = new ActionListener()
+        {
+            private Mat frame = new Mat();
+
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                // capture a frame
+                // Mat frame = new Mat();
+                if (capture.read(frame))
+                {
+                    // process the frame
+                    processFrame(frame);
+                    // convert the frame into a javafx image
+                    Image image = convertFrameToImage(frame);
+                    // display the image
+                    cameraView.setImage(image);
+                }
+            }
+        };
+
+        timer = new Timer(TIMER_INTERVAL, timerAction);
         timer.start();
+    }
+
+    @Override
+    public void stop(){
+        System.out.println("Stage is closing");
+        timer.stop();
+        // Save file
     }
 
     /**
@@ -181,7 +222,7 @@ public class Main extends Application {
      * @param eyes
      * @return
      */
-    private Rect blowupEyeRect(@NotNull Rect[] faces, @NotNull Rect[] eyes)
+    private Rect blowupEyeRect(@NotNull Rect @NotNull [] faces, @NotNull Rect[] eyes)
     {
         Rect eyeRect = null;
 
@@ -338,6 +379,7 @@ public class Main extends Application {
         cameraView.setFitHeight(stage.getHeight()-20);
     }
 
+/*
     private class DrawTimer extends AnimationTimer
     {
         @Override
@@ -348,7 +390,7 @@ public class Main extends Application {
             if (capture.read(frame))
             {
                 // process the frame
-                processFrame(frame);
+                //processFrame(frame);
 
                 // convert the frame into a javafx image
                 Image image = convertFrameToImage(frame);
@@ -357,5 +399,21 @@ public class Main extends Application {
                 cameraView.setImage(image);
             }
         }
+    }
+*/
+
+    private String makeFilePath(String ...names)
+    {
+        String result = "";
+        if (names.length > 0)
+        {
+            result = names[0];
+            for (int i = 1; i < names.length; i++)
+            {
+                result = result + File.separator + names[i];
+            }
+        }
+        System.out.println(result);
+        return result;
     }
 }
