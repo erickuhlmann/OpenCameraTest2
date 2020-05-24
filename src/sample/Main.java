@@ -62,7 +62,7 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception
     {
-        System.out.println(Core.VERSION);
+        System.out.println("OpenCV version " + Core.VERSION);
 
         FXMLLoader loader = new FXMLLoader();
         loader.setController(this);
@@ -305,7 +305,7 @@ public class Main extends Application {
         }
     }
 
-    private static double minLeft(List<Rect> rects)
+    private static double minLeft(@NotNull List<Rect> rects)
     {
         double result = rects.get(0).tl().x;
         for (int i = 1; i < rects.size(); i++)
@@ -318,7 +318,7 @@ public class Main extends Application {
         return result;
     }
 
-    private static double minTop(List<Rect> rects)
+    private static double minTop(@NotNull List<Rect> rects)
     {
         double result = rects.get(0).tl().y;
         for (int i = 1; i < rects.size(); i++)
@@ -331,7 +331,7 @@ public class Main extends Application {
         return result;
     }
 
-    private static double maxRight(List<Rect> rects)
+    private static double maxRight(@NotNull List<Rect> rects)
     {
         double result = rects.get(0).br().x;
         for (int i = 1; i < rects.size(); i++)
@@ -344,7 +344,7 @@ public class Main extends Application {
         return result;
     }
 
-    private static double maxBottom(List<Rect> rects)
+    private static double maxBottom(@NotNull List<Rect> rects)
     {
         double result = rects.get(0).br().y;
         for (int i = 1; i < rects.size(); i++)
@@ -357,7 +357,7 @@ public class Main extends Application {
         return result;
     }
 
-    private static boolean rect1InRect2(Rect rect1, Rect rect2)
+    private static boolean rect1InRect2(@NotNull Rect rect1, @NotNull Rect rect2)
     {
         return (rect1.tl().x >= rect2.tl().x) && (rect1.tl().y >= rect2.tl().y)
                 && (rect1.br().x <= rect2.br().x) && (rect1.br().y <= rect2.br().y);
@@ -373,7 +373,7 @@ public class Main extends Application {
      * @param stage
      * @param scene
      */
-    private void resizeCameraView(Stage stage, Scene scene)
+    private void resizeCameraView(@NotNull Stage stage, Scene scene)
     {
         cameraView.setFitWidth(stage.getWidth());
         cameraView.setFitHeight(stage.getHeight()-20);

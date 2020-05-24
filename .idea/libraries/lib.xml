@@ -2,6 +2,7 @@
   <library name="lib">
     <CLASSES>
       <root url="file:///usr/lib/jvm/javafx/armv6hf-sdk/lib" />
+      <root url="file://C:/Program Files/Java/javafx-sdk-14/lib" />
     </CLASSES>
     <JAVADOC />
     <NATIVE>
@@ -9,8 +10,11 @@
     </NATIVE>
     <SOURCES>
       <root url="file:///usr/lib/jvm/javafx/armv6hf-sdk/lib" />
+      <root url="file://C:/Program Files/Java/javafx-sdk-14/lib" />
     </SOURCES>
     <jarDirectory url="file:///usr/lib/jvm/javafx/armv6hf-sdk/lib" recursive="false" />
+    <jarDirectory url="file://C:/Program Files/Java/javafx-sdk-14/lib" recursive="false" />
     <jarDirectory url="file:///usr/lib/jvm/javafx/armv6hf-sdk/lib" recursive="false" type="SOURCES" />
+    <jarDirectory url="file://C:/Program Files/Java/javafx-sdk-14/lib" recursive="false" type="SOURCES" />
   </library>
 </component>
