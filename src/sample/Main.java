@@ -5,6 +5,7 @@ import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
@@ -31,10 +32,10 @@ import java.util.Vector;
 
 public class Main extends Application {
 
-    private static final boolean BLOWUP_EYE = false;
+    private static final boolean BLOWUP_EYE = true;
     private static final boolean DRAW_KELLY_MASKS = false;
-    private static final boolean OUTLINE_FACES = false;
-    private static final boolean OUTLINE_EYES = false;
+    private static final boolean OUTLINE_FACES = true;
+    private static final boolean OUTLINE_EYES = true;
     private static final boolean OUTLINE_MOUTHS = false;
 
     private static final Scalar MASK_COLOR = new Scalar(0,0,0,255); // black
@@ -74,6 +75,9 @@ public class Main extends Application {
         primaryStage.setScene(primaryScene);
         primaryStage.show();
 
+        // Full screen
+        //primaryStage.setFullScreen(true);
+
         // get camera image to resize with window resize
         ChangeListener<Number> stageSizeListener = (observable, oldValue, newValue) ->
             resizeCameraView(primaryStage, primaryScene);
@@ -111,10 +115,31 @@ public class Main extends Application {
                 {
                     // process the frame
                     processFrame(frame);
+
                     // convert the frame into a javafx image
                     Image image = convertFrameToImage(frame);
+
+                    // crop the image to fit the image view aspect ratio
+
+                    double displayWidth = cameraView.getFitWidth();
+                    double imageWidth = frame.width();
+                    double imageHeight = frame.height();
+                    double viewHeight = cameraView.getFitHeight();
+
+                    double ratio = displayWidth / imageWidth;
+                    double scaledWidth = imageWidth * ratio;
+                    double scaledHeight = imageHeight * ratio;
+
+                    double sourceWidth = imageWidth;
+                    double sourceHeight = viewHeight / ratio;
+
+                    double sourceY = (imageHeight - sourceHeight) / 2;
+
+                    Rectangle2D viewRect = new Rectangle2D(0, sourceY, sourceWidth, sourceHeight);
+
                     // display the image
                     cameraView.setImage(image);
+                    cameraView.setViewport(viewRect);
                 }
             }
         };
@@ -376,31 +401,9 @@ public class Main extends Application {
     private void resizeCameraView(@NotNull Stage stage, Scene scene)
     {
         cameraView.setFitWidth(stage.getWidth());
-        cameraView.setFitHeight(stage.getHeight()-20);
+        cameraView.setFitHeight(stage.getHeight());
+
     }
-
-/*
-    private class DrawTimer extends AnimationTimer
-    {
-        @Override
-        public void handle(long now)
-        {
-            // capture a frame
-            Mat frame = new Mat();
-            if (capture.read(frame))
-            {
-                // process the frame
-                //processFrame(frame);
-
-                // convert the frame into a javafx image
-                Image image = convertFrameToImage(frame);
-
-                // display the image
-                cameraView.setImage(image);
-            }
-        }
-    }
-*/
 
     private String makeFilePath(String ...names)
     {
