@@ -8,6 +8,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.KeyCode;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
@@ -77,6 +79,12 @@ public class Main extends Application {
 
         // Full screen
         //primaryStage.setFullScreen(true);
+        primaryScene.addEventHandler(KeyEvent.KEY_PRESSED, (key) -> {
+            if(key.getCode()==KeyCode.F12) {
+                System.out.println("You pressed F12");
+                primaryStage.setFullScreen(!primaryStage.isFullScreen());
+            }
+        });
 
         // get camera image to resize with window resize
         ChangeListener<Number> stageSizeListener = (observable, oldValue, newValue) ->
