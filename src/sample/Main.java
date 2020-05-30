@@ -34,11 +34,11 @@ import java.util.Vector;
 
 public class Main extends Application {
 
-    private static final boolean BLOWUP_EYE = true;
-    private static final boolean DRAW_KELLY_MASKS = false;
-    private static final boolean OUTLINE_FACES = true;
-    private static final boolean OUTLINE_EYES = true;
-    private static final boolean OUTLINE_MOUTHS = false;
+    private boolean BLOWUP_EYE = true;
+    private boolean DRAW_KELLY_MASKS = false;
+    private boolean OUTLINE_FACES = true;
+    private boolean OUTLINE_EYES = true;
+    private boolean OUTLINE_MOUTHS = false;
 
     private static final Scalar MASK_COLOR = new Scalar(0,0,0,255); // black
 
@@ -62,9 +62,13 @@ public class Main extends Application {
     CascadeClassifier eyeCascade;
     CascadeClassifier mouthCascade;
 
+    private Stage primaryStage;
+
     @Override
-    public void start(Stage primaryStage) throws Exception
+    public void start(Stage stage) throws Exception
     {
+        primaryStage = stage;
+
         System.out.println("OpenCV version " + Core.VERSION);
 
         FXMLLoader loader = new FXMLLoader();
@@ -77,13 +81,9 @@ public class Main extends Application {
         primaryStage.setScene(primaryScene);
         primaryStage.show();
 
-        // Full screen
-        //primaryStage.setFullScreen(true);
-        primaryScene.addEventHandler(KeyEvent.KEY_PRESSED, (key) -> {
-            if(key.getCode()==KeyCode.F12) {
-                System.out.println("You pressed F12");
-                primaryStage.setFullScreen(!primaryStage.isFullScreen());
-            }
+        // Handle key presses
+        primaryScene.addEventHandler(KeyEvent.KEY_PRESSED, (event) -> {
+            handleKeyPressed(event);
         });
 
         // get camera image to resize with window resize
@@ -135,8 +135,6 @@ public class Main extends Application {
                     double viewHeight = cameraView.getFitHeight();
 
                     double ratio = displayWidth / imageWidth;
-                    double scaledWidth = imageWidth * ratio;
-                    double scaledHeight = imageHeight * ratio;
 
                     double sourceWidth = imageWidth;
                     double sourceHeight = viewHeight / ratio;
@@ -163,9 +161,34 @@ public class Main extends Application {
         // Save file
     }
 
+    private void handleKeyPressed(KeyEvent event)
+    {
+        switch (event.getCode())
+        {
+            case F12:
+                primaryStage.setFullScreen(!primaryStage.isFullScreen());
+                break;
+            case B:
+                BLOWUP_EYE = !BLOWUP_EYE;
+                break;
+            case F:
+                OUTLINE_FACES = !OUTLINE_FACES;
+                break;
+            case E:
+                OUTLINE_EYES = !OUTLINE_EYES;
+                break;
+            case M:
+                OUTLINE_MOUTHS = !OUTLINE_MOUTHS;
+                break;
+            case K:
+                DRAW_KELLY_MASKS = !DRAW_KELLY_MASKS;
+                break;
+        }
+    }
+
     /**
      * Executes detection and painting results
-     * @param frame
+     * @param frame The OpenCV frame on which detection will be done and results painted.
      */
     private void processFrame(Mat frame)
     {
@@ -284,6 +307,11 @@ public class Main extends Application {
         return eyeRect;
     }
 
+    /**
+     * Convert an OpenCV frame to a JavaFX image.
+     * @param frame The frame to convert.
+     * @return The resulting image.
+     */
     private Image convertFrameToImage(Mat frame)
     {
         MatOfByte buffer = new MatOfByte();
@@ -291,6 +319,12 @@ public class Main extends Application {
         return new Image(new ByteArrayInputStream(buffer.toArray()));
     }
 
+    /**
+     * Draw Ned Kelly style masks on detected faces.
+     * @param frame Masks will be drawn to this frame.
+     * @param faces List of faces that have been detected.
+     * @param eyes List of eyes that have been detected.
+     */
     private void drawKellyMasks(@NotNull Mat frame, @NotNull Rect[] faces, @NotNull Rect[] eyes)
     {
         // draw a mask for each face
@@ -340,6 +374,7 @@ public class Main extends Application {
 
     private static double minLeft(@NotNull List<Rect> rects)
     {
+        assert rects.size() > 0;
         double result = rects.get(0).tl().x;
         for (int i = 1; i < rects.size(); i++)
         {
@@ -353,6 +388,7 @@ public class Main extends Application {
 
     private static double minTop(@NotNull List<Rect> rects)
     {
+        assert rects.size() > 0;
         double result = rects.get(0).tl().y;
         for (int i = 1; i < rects.size(); i++)
         {
@@ -366,6 +402,7 @@ public class Main extends Application {
 
     private static double maxRight(@NotNull List<Rect> rects)
     {
+        assert rects.size() > 0;
         double result = rects.get(0).br().x;
         for (int i = 1; i < rects.size(); i++)
         {
@@ -379,6 +416,7 @@ public class Main extends Application {
 
     private static double maxBottom(@NotNull List<Rect> rects)
     {
+        assert rects.size() > 0;
         double result = rects.get(0).br().y;
         for (int i = 1; i < rects.size(); i++)
         {
@@ -390,12 +428,22 @@ public class Main extends Application {
         return result;
     }
 
+    /**
+     * Check if rect1 is completely within rect2.
+     * @param rect1 The inside rectangle.
+     * @param rect2 The outside rectangle.
+     * @return True if rect1 is completely withing rect2, false otherwise.
+     */
     private static boolean rect1InRect2(@NotNull Rect rect1, @NotNull Rect rect2)
     {
         return (rect1.tl().x >= rect2.tl().x) && (rect1.tl().y >= rect2.tl().y)
                 && (rect1.br().x <= rect2.br().x) && (rect1.br().y <= rect2.br().y);
     }
 
+    /**
+     * Application entry point.
+     * @param args Arguments passed to the application.
+     */
     public static void main(String[] args)
     {
         launch(args);
@@ -403,16 +451,20 @@ public class Main extends Application {
 
     /**
      * Resizes the CameraView to fill the stage (window)
-     * @param stage
-     * @param scene
+     * @param stage The stage (window).
+     * @param scene The scene containing the CameraView.
      */
     private void resizeCameraView(@NotNull Stage stage, Scene scene)
     {
         cameraView.setFitWidth(stage.getWidth());
         cameraView.setFitHeight(stage.getHeight());
-
     }
 
+    /**
+     * Build a file path string using the current separator character.
+     * @param names Elements of the file path.
+     * @return
+     */
     private String makeFilePath(String ...names)
     {
         String result = "";
