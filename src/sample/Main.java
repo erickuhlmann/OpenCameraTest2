@@ -1,6 +1,5 @@
 package sample;
 
-import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
@@ -9,12 +8,10 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.input.KeyCode;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import org.jetbrains.annotations.NotNull;
 import org.opencv.core.*;
@@ -23,7 +20,6 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
 import org.opencv.objdetect.Objdetect;
 import org.opencv.videoio.VideoCapture;
-
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -40,7 +36,9 @@ public class Main extends Application {
     private boolean OUTLINE_EYES = true;
     private boolean OUTLINE_MOUTHS = false;
 
-    private static final Scalar MASK_COLOR = new Scalar(0,0,0,255); // black
+    private boolean DETECT_MOUTHS = false;
+
+    private static final Scalar KELLY_MASK_COLOR = new Scalar(0,0,0,255); // black
 
     private static final int TIMER_INTERVAL = 250;
 
@@ -106,10 +104,7 @@ public class Main extends Application {
         capture = new VideoCapture();
         capture.open(0);
 
-        // start draw timer
-        // timer = new DrawTimer();
-        // timer.start();
-
+        // setup the timer
         ActionListener timerAction = new ActionListener()
         {
             private Mat frame = new Mat();
@@ -154,6 +149,9 @@ public class Main extends Application {
         timer.start();
     }
 
+    /**
+     * Stop the timer when the main window is closed so that the application will terminate.
+     */
     @Override
     public void stop(){
         System.out.println("Stage is closing");
@@ -161,7 +159,11 @@ public class Main extends Application {
         // Save file
     }
 
-    private void handleKeyPressed(KeyEvent event)
+    /**
+     * Handle key pressed events.
+     * @param event The key pressed event.
+     */
+    private void handleKeyPressed(@NotNull KeyEvent event)
     {
         switch (event.getCode())
         {
@@ -212,8 +214,11 @@ public class Main extends Application {
         // do mouth detection
         int minMouthSize = Math.round(grayFrame.rows() * 0.2f);
         MatOfRect mouths = new MatOfRect();
-        mouthCascade.detectMultiScale(grayFrame, mouths, 1.1, 2,
-                Objdetect.CASCADE_SCALE_IMAGE, new Size(minMouthSize,minMouthSize), new Size());
+        if (DETECT_MOUTHS)
+        {
+            mouthCascade.detectMultiScale(grayFrame, mouths, 1.1, 2,
+                    Objdetect.CASCADE_SCALE_IMAGE, new Size(minMouthSize, minMouthSize), new Size());
+        }
 
         // get Rect arrays from detected rectangles
         Rect[] facesArray = faces.toArray();
@@ -359,10 +364,10 @@ public class Main extends Application {
                 Point pF = new Point(eyesRect.br().x, face.br().y);
                 Point pG = new Point(eyesRect.br().x, face.tl().y);
                 Point pH = face.br();
-                Imgproc.rectangle(frame, pA, pB, MASK_COLOR, Imgproc.FILLED);
-                Imgproc.rectangle(frame, pC, pD, MASK_COLOR, Imgproc.FILLED);
-                Imgproc.rectangle(frame, pE, pF, MASK_COLOR, Imgproc.FILLED);
-                Imgproc.rectangle(frame, pG, pH, MASK_COLOR, Imgproc.FILLED);
+                Imgproc.rectangle(frame, pA, pB, KELLY_MASK_COLOR, Imgproc.FILLED);
+                Imgproc.rectangle(frame, pC, pD, KELLY_MASK_COLOR, Imgproc.FILLED);
+                Imgproc.rectangle(frame, pE, pF, KELLY_MASK_COLOR, Imgproc.FILLED);
+                Imgproc.rectangle(frame, pG, pH, KELLY_MASK_COLOR, Imgproc.FILLED);
             }
             // otherwise, draw a face with no eyes
             else
