@@ -35,6 +35,7 @@ public class Main extends Application {
     private boolean OUTLINE_FACES = true;
     private boolean OUTLINE_EYES = true;
     private boolean OUTLINE_MOUTHS = false;
+    private boolean FREEZE_IMAGE = false;
 
     private boolean DETECT_MOUTHS = false;
 
@@ -51,6 +52,7 @@ public class Main extends Application {
     @FXML
     private BorderPane borderPane;
 
+    // Load OpenCV native library
     static { System.loadLibrary(Core.NATIVE_LIBRARY_NAME); }
 
     private VideoCapture capture;
@@ -139,8 +141,11 @@ public class Main extends Application {
                     Rectangle2D viewRect = new Rectangle2D(0, sourceY, sourceWidth, sourceHeight);
 
                     // display the image
-                    cameraView.setImage(image);
-                    cameraView.setViewport(viewRect);
+                    if (!FREEZE_IMAGE)
+                    {
+                        cameraView.setImage(image);
+                        cameraView.setViewport(viewRect);
+                    }
                 }
             }
         };
@@ -184,6 +189,9 @@ public class Main extends Application {
                 break;
             case K:
                 DRAW_KELLY_MASKS = !DRAW_KELLY_MASKS;
+                break;
+            case R:
+                FREEZE_IMAGE = !FREEZE_IMAGE;
                 break;
         }
     }
