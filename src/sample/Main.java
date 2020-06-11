@@ -30,6 +30,8 @@ import java.util.Vector;
 
 public class Main extends Application {
 
+    private static final boolean START_FULLSCREEN = true;
+
     private boolean BLOWUP_EYE = true;
     private boolean DRAW_KELLY_MASKS = false;
     private boolean OUTLINE_FACES = true;
@@ -80,6 +82,11 @@ public class Main extends Application {
         Scene primaryScene = new Scene(root, 640, 480);
         primaryStage.setScene(primaryScene);
         primaryStage.show();
+
+        if (START_FULLSCREEN)
+        {
+            primaryStage.setFullScreen(true);
+        }
 
         // Handle key presses
         primaryScene.addEventHandler(KeyEvent.KEY_PRESSED, (event) -> {
@@ -161,7 +168,6 @@ public class Main extends Application {
     public void stop(){
         System.out.println("Stage is closing");
         timer.stop();
-        // Save file
     }
 
     /**
