@@ -1,5 +1,8 @@
 package sample;
 
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
@@ -14,6 +17,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import org.jetbrains.annotations.NotNull;
 import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
@@ -59,7 +63,6 @@ public class Main extends Application {
     static { System.loadLibrary(Core.NATIVE_LIBRARY_NAME); }
 
     private VideoCapture capture;
-    private Timer timer;
 
     CascadeClassifier faceCascade;
     CascadeClassifier eyeCascade;
@@ -116,61 +119,49 @@ public class Main extends Application {
         capture = new VideoCapture();
         capture.open(0);
 
-        // setup the timer
-        ActionListener timerAction = new ActionListener()
-        {
-            private Mat frame = new Mat();
-
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                // capture a frame
-                // Mat frame = new Mat();
-                if (capture.read(frame))
-                {
-                    // process the frame
-                    processFrame(frame);
-
-                    // convert the frame into a javafx image
-                    Image image = convertFrameToImage(frame);
-
-                    // crop the image to fit the image view aspect ratio
-
-                    double displayWidth = cameraView.getFitWidth();
-                    double imageWidth = frame.width();
-                    double imageHeight = frame.height();
-                    double viewHeight = cameraView.getFitHeight();
-
-                    double ratio = displayWidth / imageWidth;
-
-                    double sourceWidth = imageWidth;
-                    double sourceHeight = viewHeight / ratio;
-
-                    double sourceY = (imageHeight - sourceHeight) / 2;
-
-                    Rectangle2D viewRect = new Rectangle2D(0, sourceY, sourceWidth, sourceHeight);
-
-                    // display the image
-                    if (!FREEZE_IMAGE)
-                    {
-                        cameraView.setImage(image);
-                        cameraView.setViewport(viewRect);
-                    }
-                }
-            }
-        };
-
-        timer = new Timer(TIMER_INTERVAL, timerAction);
-        timer.start();
+        // initialise and start the timer
+        Timeline timeline = new Timeline(new KeyFrame(Duration.millis(TIMER_INTERVAL), e -> handleTimerEvent()));
+        timeline.setCycleCount(Animation.INDEFINITE);
+        timeline.play();
     }
 
     /**
-     * Stop the timer when the main window is closed so that the application will terminate.
+     * Handle a timer event
      */
-    @Override
-    public void stop(){
-        System.out.println("Stage is closing");
-        timer.stop();
+    private void handleTimerEvent()
+    {
+        Mat frame = new Mat();
+        if (capture.read(frame))
+        {
+            // process the frame
+            processFrame(frame);
+
+            // convert the frame into a javafx image
+            Image image = convertFrameToImage(frame);
+
+            // crop the image to fit the image view aspect ratio
+
+            double displayWidth = cameraView.getFitWidth();
+            double imageWidth = frame.width();
+            double imageHeight = frame.height();
+            double viewHeight = cameraView.getFitHeight();
+
+            double ratio = displayWidth / imageWidth;
+
+            double sourceWidth = imageWidth;
+            double sourceHeight = viewHeight / ratio;
+
+            double sourceY = (imageHeight - sourceHeight) / 2;
+
+            Rectangle2D viewRect = new Rectangle2D(0, sourceY, sourceWidth, sourceHeight);
+
+            // display the image
+            if (!FREEZE_IMAGE)
+            {
+                cameraView.setImage(image);
+                cameraView.setViewport(viewRect);
+            }
+        }
     }
 
     /**
