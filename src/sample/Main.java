@@ -48,7 +48,7 @@ public class Main extends Application {
 
     private static final Scalar KELLY_MASK_COLOR = new Scalar(0,0,0,255); // black
 
-    private static final int TIMER_INTERVAL = 250;
+    private static final int TIMER_INTERVAL = 1000;
 
     @FXML
     private ImageView cameraView;
