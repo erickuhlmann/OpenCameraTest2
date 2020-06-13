@@ -5,6 +5,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;
+import javafx.scene.Cursor;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyEvent;
@@ -65,6 +66,7 @@ public class Main extends Application {
     CascadeClassifier mouthCascade;
 
     private Stage primaryStage;
+    private Scene primaryScene;
 
     @Override
     public void start(Stage stage) throws Exception
@@ -79,13 +81,14 @@ public class Main extends Application {
         Parent root = loader.load();
 
         primaryStage.setTitle("Eyeblow");
-        Scene primaryScene = new Scene(root, 640, 480);
+        primaryScene = new Scene(root, 640, 480);
         primaryStage.setScene(primaryScene);
         primaryStage.show();
 
         if (START_FULLSCREEN)
         {
             primaryStage.setFullScreen(true);
+            primaryScene.setCursor(Cursor.NONE);
         }
 
         // Handle key presses
@@ -180,6 +183,17 @@ public class Main extends Application {
         {
             case F12:
                 primaryStage.setFullScreen(!primaryStage.isFullScreen());
+                if (primaryStage.isFullScreen())
+                {
+                    primaryScene.setCursor(Cursor.NONE);
+                }
+                else
+                {
+                    primaryScene.setCursor(Cursor.DEFAULT);
+                }
+                break;
+            case ESCAPE:
+                primaryScene.setCursor(Cursor.DEFAULT);
                 break;
             case B:
                 BLOWUP_EYE = !BLOWUP_EYE;
