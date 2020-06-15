@@ -36,6 +36,7 @@ import java.util.Vector;
 public class Main extends Application {
 
     private static final boolean START_FULLSCREEN = true;
+    private static final boolean MIRROR_INPUT = true;
 
     private boolean BLOWUP_EYE = true;
     private boolean DRAW_KELLY_MASKS = false;
@@ -133,6 +134,13 @@ public class Main extends Application {
         Mat frame = new Mat();
         if (capture.read(frame))
         {
+            if (MIRROR_INPUT)
+            {
+                Mat mirroredFrame = new Mat();
+                Core.flip(frame, mirroredFrame, 1);
+                frame = mirroredFrame;
+            }
+
             // process the frame
             processFrame(frame);
 
@@ -213,7 +221,7 @@ public class Main extends Application {
      */
     private void processFrame(Mat frame)
     {
-        // prepare for face detection
+        // prepare for detection - do it on an equalised grayscale version of the source image
         Mat grayFrame = new Mat();
         Imgproc.cvtColor(frame, grayFrame, Imgproc.COLOR_BGR2GRAY);
         Imgproc.equalizeHist(grayFrame, grayFrame);
