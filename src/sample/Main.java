@@ -39,6 +39,7 @@ public class Main extends Application {
     private static final boolean MIRROR_INPUT = true;
 
     private boolean BLOWUP_EYE = true;
+    private boolean BLOWUP_AUDIO = true;
     private boolean DRAW_KELLY_MASKS = false;
     private boolean OUTLINE_FACES = true;
     private boolean OUTLINE_EYES = true;
@@ -71,6 +72,8 @@ public class Main extends Application {
 
     private Stage primaryStage;
     private Scene primaryScene;
+
+    private AudioThread audioThread;
 
     @Override
     public void start(Stage stage) throws Exception
@@ -124,6 +127,11 @@ public class Main extends Application {
         Timeline timeline = new Timeline(new KeyFrame(Duration.millis(TIMER_INTERVAL), e -> handleTimerEvent()));
         timeline.setCycleCount(Animation.INDEFINITE);
         timeline.play();
+
+        // start the audio thread
+        audioThread = new AudioThread();
+        audioThread.setDaemon(true);
+        audioThread.start();
     }
 
     /**
@@ -265,6 +273,14 @@ public class Main extends Application {
                 blowupSize.height = frame.height();
                 Imgproc.resize(sourceEyeMat, blowupEyeMat, blowupSize);
                 blowupEyeMat.copyTo(frame);
+
+                // play audio
+                if (BLOWUP_AUDIO)
+                    audioThread.startSound();
+            }
+            else
+            {
+                audioThread.stopSound();
             }
         }
 
