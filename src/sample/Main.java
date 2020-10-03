@@ -20,12 +20,14 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.jetbrains.annotations.NotNull;
 import org.opencv.core.*;
+import org.opencv.core.Point;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
 import org.opencv.objdetect.Objdetect;
 import org.opencv.videoio.VideoCapture;
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.ByteArrayInputStream;
@@ -40,11 +42,13 @@ public class Main extends Application {
 
     private boolean BLOWUP_EYE = true;
     private boolean BLOWUP_AUDIO = true;
+    private boolean EQUALIZE_INPUT = false;
     private boolean DRAW_KELLY_MASKS = false;
     private boolean OUTLINE_FACES = true;
     private boolean OUTLINE_EYES = true;
     private boolean OUTLINE_MOUTHS = false;
     private boolean FREEZE_IMAGE = false;
+    private boolean GRAYSCALE_IMAGE = false;
 
     private boolean DETECT_MOUTHS = false;
 
@@ -152,6 +156,14 @@ public class Main extends Application {
             // process the frame
             processFrame(frame);
 
+            if (EQUALIZE_INPUT)
+            {
+                //Mat equalizedFrame = new Mat();
+                //Imgproc.equalizeHist(frame, equalizedFrame);
+                //frame = equalizedFrame;
+                // only works grayscale not color
+            }
+
             // convert the frame into a javafx image
             Image image = convertFrameToImage(frame);
 
@@ -220,6 +232,12 @@ public class Main extends Application {
             case R:
                 FREEZE_IMAGE = !FREEZE_IMAGE;
                 break;
+            case Q:
+                EQUALIZE_INPUT = !EQUALIZE_INPUT;
+                break;
+            case G:
+                GRAYSCALE_IMAGE = !GRAYSCALE_IMAGE;
+                break;
         }
     }
 
@@ -253,6 +271,12 @@ public class Main extends Application {
         {
             mouthCascade.detectMultiScale(grayFrame, mouths, 1.1, 2,
                     Objdetect.CASCADE_SCALE_IMAGE, new Size(minMouthSize, minMouthSize), new Size());
+        }
+
+        // grayscale
+        if (GRAYSCALE_IMAGE)
+        {
+            grayFrame.copyTo(frame);
         }
 
         // get Rect arrays from detected rectangles
