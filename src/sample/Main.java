@@ -79,6 +79,8 @@ public class Main extends Application {
 
     private AudioThread audioThread;
 
+    private static String[] arguments;
+
     @Override
     public void start(Stage stage) throws Exception
     {
@@ -86,6 +88,8 @@ public class Main extends Application {
 
         System.out.println("OpenCV version " + Core.VERSION);
 
+        handleArguments(arguments);
+        
         FXMLLoader loader = new FXMLLoader();
         loader.setController(this);
         loader.setLocation(getClass().getResource("sample.fxml"));
@@ -138,6 +142,49 @@ public class Main extends Application {
         audioThread.start();
     }
 
+    private void handleArguments(String[] args)
+    {
+        for (String a: args)
+        {
+            switch (a)
+            {
+                case "+b":
+                    BLOWUP_EYE = true;
+                    break;
+                case "-b":
+                    BLOWUP_EYE = false;
+                    break;
+                case "+f":
+                    OUTLINE_FACES = true;
+                    break;
+                case "-f":
+                    OUTLINE_FACES = false;
+                    break;
+                case "+e":
+                    OUTLINE_EYES = true;
+                    break;
+                case "-e":
+                    OUTLINE_EYES = false;
+                    break;
+                case "+k":
+                    DRAW_KELLY_MASKS = true;
+                    break;
+                case "-k":
+                    DRAW_KELLY_MASKS = false;
+                    break;
+                case "+g":
+                    GRAYSCALE_IMAGE = true;
+                    break;
+                case "-g":
+                    GRAYSCALE_IMAGE = false;
+                    break;
+                default:
+                    System.out.println("Unreconised argument: " + a);
+                    break;
+            }
+        }
+    }
+    
     /**
      * Handle a timer event
      */
@@ -518,6 +565,7 @@ public class Main extends Application {
      */
     public static void main(String[] args)
     {
+        arguments = args;
         launch(args);
     }
 
