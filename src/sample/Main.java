@@ -26,10 +26,7 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
 import org.opencv.objdetect.Objdetect;
 import org.opencv.videoio.VideoCapture;
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.util.List;
@@ -40,10 +37,11 @@ public class Main extends Application {
     private static final boolean START_FULLSCREEN = true;
     private static final boolean MIRROR_INPUT = true;
 
-    private boolean BLOWUP_EYE = true;
+    private boolean BLOWUP_EYE = false;
     private boolean BLOWUP_AUDIO = true;
     private boolean EQUALIZE_INPUT = false;
-    private boolean DRAW_KELLY_MASKS = false;
+    private boolean DRAW_KELLY_MASKS = true;
+    private boolean KELLY_HUM = true;
     private boolean OUTLINE_FACES = true;
     private boolean OUTLINE_EYES = true;
     private boolean OUTLINE_MOUTHS = false;
@@ -77,7 +75,8 @@ public class Main extends Application {
     private Stage primaryStage;
     private Scene primaryScene;
 
-    private AudioThread audioThread;
+    private SirenThread sirenThread;
+    private HumThread humThread;
 
     private static String[] arguments;
 
@@ -136,10 +135,15 @@ public class Main extends Application {
         timeline.setCycleCount(Animation.INDEFINITE);
         timeline.play();
 
-        // start the audio thread
-        audioThread = new AudioThread();
-        audioThread.setDaemon(true);
-        audioThread.start();
+        // start the audio threads
+
+        sirenThread = new SirenThread();
+        sirenThread.setDaemon(true);
+        sirenThread.start();
+
+        humThread = new HumThread();
+        humThread.setDaemon(true);
+        humThread.start();
     }
 
     private void handleArguments(String[] args)
@@ -179,7 +183,7 @@ public class Main extends Application {
                     GRAYSCALE_IMAGE = false;
                     break;
                 default:
-                    System.out.println("Unreconised argument: " + a);
+                    System.out.println("Unrecognised argument: " + a);
                     break;
             }
         }
@@ -347,11 +351,11 @@ public class Main extends Application {
 
                 // play audio
                 if (BLOWUP_AUDIO)
-                    audioThread.startSound();
+                    sirenThread.startSound();
             }
             else
             {
-                audioThread.stopSound();
+                sirenThread.stopSound();
             }
         }
 
@@ -359,6 +363,10 @@ public class Main extends Application {
         if (DRAW_KELLY_MASKS)
         {
             drawKellyMasks(frame, facesArray, eyesArray);
+            if (facesArray.length > 0)
+                humThread.stopSound();
+            else if (KELLY_HUM)
+                humThread.startSound();
         }
 
         // draw results of face detection to the original camera frame
@@ -486,7 +494,7 @@ public class Main extends Application {
             // otherwise, draw a face with no eyes
             else
             {
-                //Imgproc.rectangle(frame, face.tl(), face.br(), MASK_COLOR, Imgproc.FILLED);
+                Imgproc.rectangle(frame, face.tl(), face.br(), KELLY_MASK_COLOR, Imgproc.FILLED);
             }
         }
     }

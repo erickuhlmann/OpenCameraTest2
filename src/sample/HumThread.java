@@ -5,7 +5,10 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 
-public class AudioThread extends Thread
+/**
+ * Emits a humming sound while the thread is active.
+ */
+public class HumThread extends Thread
 {
     private static final int SAMPLE_RATE = 16 * 1024;
 
@@ -47,23 +50,12 @@ public class AudioThread extends Thread
         line.open(af, SAMPLE_RATE);
         line.start();
 
-        boolean forwardNotBack = true;
+        double freq = 150;
 
-        for(double freq = 400; freq <= 800;)
+        for (int i = 0; i < 50; i++)
         {
-            byte [] toneBuffer = createSinWaveBuffer(freq);
+            byte[] toneBuffer = createSinWaveBuffer(freq);
             int count = line.write(toneBuffer, 0, toneBuffer.length);
-
-            if(forwardNotBack)
-            {
-                freq += 20;
-                forwardNotBack = false;
-            }
-            else
-            {
-                freq -= 10;
-                forwardNotBack = true;
-            }
         }
 
         line.drain();
@@ -84,6 +76,5 @@ public class AudioThread extends Thread
         }
         return output;
     }
-
 
 }
