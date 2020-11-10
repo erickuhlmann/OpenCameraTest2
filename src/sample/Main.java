@@ -152,6 +152,12 @@ public class Main extends Application {
         {
             switch (a)
             {
+                case "eyeblow":
+                    setupEyeblow();
+                    break;
+                case "kellymask":
+                    setupKellymask();
+                    break;
                 case "+b":
                     BLOWUP_EYE = true;
                     break;
@@ -606,5 +612,28 @@ public class Main extends Application {
         }
         System.out.println(result);
         return result;
+    }
+
+    private void setupEyeblow()
+    {
+        BLOWUP_EYE = true;
+        BLOWUP_AUDIO = true;
+        DRAW_KELLY_MASKS = false;
+        KELLY_HUM = false;
+        OUTLINE_FACES = true;
+        OUTLINE_EYES = true;
+        GRAYSCALE_IMAGE = false;
+    }
+
+    private void setupKellymask()
+    {
+        BLOWUP_EYE = false;
+        BLOWUP_AUDIO = false;
+        DRAW_KELLY_MASKS = true;
+        KELLY_HUM = true;
+        OUTLINE_FACES = false;
+        OUTLINE_EYES = false;
+        GRAYSCALE_IMAGE = false;
+
     }
 }
