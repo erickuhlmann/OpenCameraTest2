@@ -54,6 +54,8 @@ public class HumThread extends Thread
 
         for (int i = 0; i < 50; i++)
         {
+            if (!soundStarted)
+                break;
             byte[] toneBuffer = createSinWaveBuffer(freq);
             int count = line.write(toneBuffer, 0, toneBuffer.length);
         }
