@@ -2,19 +2,24 @@
   <library name="lib">
     <CLASSES>
       <root url="file:///usr/lib/jvm/javafx/armv6hf-sdk/lib" />
-      <root url="file://C:/Program Files/Java/javafx-sdk-14/lib" />
+      <root url="file://$PROJECT_DIR$/../../../../Program Files/Java/javafx-sdk-14/lib" />
+      <root url="file://$PROJECT_DIR$/../../../../Program Files/Java/javafx-sdk-16/lib" />
     </CLASSES>
     <JAVADOC />
     <NATIVE>
       <root url="file:///usr/lib/jvm/javafx/armv6hf-sdk/lib" />
+      <root url="file://$PROJECT_DIR$/../../../../Program Files/opencv/build/java/x64" />
     </NATIVE>
     <SOURCES>
       <root url="file:///usr/lib/jvm/javafx/armv6hf-sdk/lib" />
-      <root url="file://C:/Program Files/Java/javafx-sdk-14/lib" />
+      <root url="file://$PROJECT_DIR$/../../../../Program Files/Java/javafx-sdk-14/lib" />
+      <root url="file://$PROJECT_DIR$/../../../../Program Files/Java/javafx-sdk-16/lib" />
     </SOURCES>
     <jarDirectory url="file:///usr/lib/jvm/javafx/armv6hf-sdk/lib" recursive="false" />
-    <jarDirectory url="file://C:/Program Files/Java/javafx-sdk-14/lib" recursive="false" />
+    <jarDirectory url="file://$PROJECT_DIR$/../../../../Program Files/Java/javafx-sdk-14/lib" recursive="false" />
+    <jarDirectory url="file://$PROJECT_DIR$/../../../../Program Files/Java/javafx-sdk-16/lib" recursive="false" />
     <jarDirectory url="file:///usr/lib/jvm/javafx/armv6hf-sdk/lib" recursive="false" type="SOURCES" />
-    <jarDirectory url="file://C:/Program Files/Java/javafx-sdk-14/lib" recursive="false" type="SOURCES" />
+    <jarDirectory url="file://$PROJECT_DIR$/../../../../Program Files/Java/javafx-sdk-14/lib" recursive="false" type="SOURCES" />
+    <jarDirectory url="file://$PROJECT_DIR$/../../../../Program Files/Java/javafx-sdk-16/lib" recursive="false" type="SOURCES" />
   </library>
 </component>

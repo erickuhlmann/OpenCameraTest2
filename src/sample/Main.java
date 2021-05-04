@@ -18,7 +18,6 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import org.jetbrains.annotations.NotNull;
 import org.opencv.core.*;
 import org.opencv.core.Point;
 import org.opencv.imgcodecs.Imgcodecs;
@@ -34,13 +33,15 @@ import java.util.Vector;
 
 public class Main extends Application {
 
+    private static final int CAMERA_INDEX = 1;
+
     private static final boolean START_FULLSCREEN = true;
     private static final boolean MIRROR_INPUT = true;
 
     private boolean BLOWUP_EYE = false;
     private boolean BLOWUP_AUDIO = true;
     private boolean EQUALIZE_INPUT = false;
-    private boolean DRAW_KELLY_MASKS = true;
+    private boolean DRAW_KELLY_MASKS = false;
     private boolean KELLY_HUM = true;
     private boolean OUTLINE_FACES = true;
     private boolean OUTLINE_EYES = true;
@@ -128,7 +129,7 @@ public class Main extends Application {
 
         // initialise video capture
         capture = new VideoCapture();
-        capture.open(0);
+        capture.open(CAMERA_INDEX);
 
         // initialise and start the timer
         Timeline timeline = new Timeline(new KeyFrame(Duration.millis(TIMER_INTERVAL), e -> handleTimerEvent()));
@@ -253,8 +254,9 @@ public class Main extends Application {
      * Handle key pressed events.
      * @param event The key pressed event.
      */
-    private void handleKeyPressed(@NotNull KeyEvent event)
+    private void handleKeyPressed(KeyEvent event)
     {
+        assert event != null;
         switch (event.getCode())
         {
             case F12:
@@ -411,8 +413,11 @@ public class Main extends Application {
      * @param eyes
      * @return
      */
-    private Rect blowupEyeRect(@NotNull Rect @NotNull [] faces, @NotNull Rect[] eyes)
+    private Rect blowupEyeRect(Rect[] faces, Rect[] eyes)
     {
+        assert faces != null;
+        assert eyes != null;
+
         Rect eyeRect = null;
 
         for (Rect f : faces)
@@ -458,8 +463,12 @@ public class Main extends Application {
      * @param faces List of faces that have been detected.
      * @param eyes List of eyes that have been detected.
      */
-    private void drawKellyMasks(@NotNull Mat frame, @NotNull Rect[] faces, @NotNull Rect[] eyes)
+    private void drawKellyMasks(Mat frame, Rect[] faces, Rect[] eyes)
     {
+        assert frame != null;
+        assert faces != null;
+        assert eyes != null;
+
         // draw a mask for each face
         for (Rect face: faces)
         {
@@ -505,8 +514,9 @@ public class Main extends Application {
         }
     }
 
-    private static double minLeft(@NotNull List<Rect> rects)
+    private static double minLeft(List<Rect> rects)
     {
+        assert rects != null;
         assert rects.size() > 0;
         double result = rects.get(0).tl().x;
         for (int i = 1; i < rects.size(); i++)
@@ -519,8 +529,9 @@ public class Main extends Application {
         return result;
     }
 
-    private static double minTop(@NotNull List<Rect> rects)
+    private static double minTop(List<Rect> rects)
     {
+        assert rects != null;
         assert rects.size() > 0;
         double result = rects.get(0).tl().y;
         for (int i = 1; i < rects.size(); i++)
@@ -533,8 +544,9 @@ public class Main extends Application {
         return result;
     }
 
-    private static double maxRight(@NotNull List<Rect> rects)
+    private static double maxRight(List<Rect> rects)
     {
+        assert rects != null;
         assert rects.size() > 0;
         double result = rects.get(0).br().x;
         for (int i = 1; i < rects.size(); i++)
@@ -547,8 +559,9 @@ public class Main extends Application {
         return result;
     }
 
-    private static double maxBottom(@NotNull List<Rect> rects)
+    private static double maxBottom(List<Rect> rects)
     {
+        assert rects != null;
         assert rects.size() > 0;
         double result = rects.get(0).br().y;
         for (int i = 1; i < rects.size(); i++)
@@ -567,8 +580,10 @@ public class Main extends Application {
      * @param rect2 The outside rectangle.
      * @return True if rect1 is completely withing rect2, false otherwise.
      */
-    private static boolean rect1InRect2(@NotNull Rect rect1, @NotNull Rect rect2)
+    private static boolean rect1InRect2(Rect rect1, Rect rect2)
     {
+        assert rect1 != null;
+        assert rect2 != null;
         return (rect1.tl().x >= rect2.tl().x) && (rect1.tl().y >= rect2.tl().y)
                 && (rect1.br().x <= rect2.br().x) && (rect1.br().y <= rect2.br().y);
     }
@@ -588,8 +603,9 @@ public class Main extends Application {
      * @param stage The stage (window).
      * @param scene The scene containing the CameraView.
      */
-    private void resizeCameraView(@NotNull Stage stage, Scene scene)
+    private void resizeCameraView(Stage stage, Scene scene)
     {
+        assert stage != null;
         cameraView.setFitWidth(stage.getWidth());
         cameraView.setFitHeight(stage.getHeight());
     }
